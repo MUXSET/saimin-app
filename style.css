@@ -522,5 +522,48 @@ body {
 .target-frame {
     background: rgba(0, 0, 0, 0.1);
     box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.5);
-    /* Dim outside */
+}
+
+/* Utility */
+.hidden {
+    display: none !important;
+}
+
+/* Control Panel Overlay in Scan Mode */
+.control-panel {
+    position: absolute;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    max-width: 300px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid var(--primary);
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    z-index: 50;
+    /* Above everything */
+    box-shadow: 0 0 20px rgba(157, 0, 255, 0.3);
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translate(-50%, 20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
+
+.panel-header {
+    margin-bottom: 15px;
+    color: var(--success);
+    font-weight: bold;
+    letter-spacing: 2px;
 }
