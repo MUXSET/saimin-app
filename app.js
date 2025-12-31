@@ -90,20 +90,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 2. Scan Logic
 const targetFrame = document.querySelector('.target-frame');
-const scanStatus = document.getElementById('scan-status-text');
-const scanControls = document.getElementById('scan-controls');
-let scanTimer;
+const scanStatus = document.getElementById('scan-control-panel-header'); // note: logic adapted to new ID logic if needed, but here we just animate bars
+const barRes = document.getElementById('bar-resistance');
+const barObey = document.getElementById('bar-obedience');
+const barLust = document.getElementById('bar-lust');
 
 function startScanSim() {
     resetScan();
-    scanStatus.innerText = '周囲の信号を検索中...';
+    // scanStatus.innerText = 'Scanning...'; // Removed text, visual only
+
+    // Animate Bars
+    if (barRes) {
+        barRes.style.width = '100%';
+        barObey.style.width = '0%';
+        barLust.style.width = '0%';
+    }
 
     // Fake delay
     scanTimer = setTimeout(() => {
         targetFrame.classList.add('locked');
-        scanStatus.innerText = '接続確立: 被験者-093';
         scanControls.classList.remove('hidden');
         playSound(1000, 0.2); // Beep
+
+        // Update bars to show vulnerability found
+        if (barRes) {
+            barRes.style.width = '40%';
+            barObey.style.width = '30%';
+            barLust.style.width = '60%';
+        }
     }, 2500);
 }
 
