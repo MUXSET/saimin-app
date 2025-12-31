@@ -112,6 +112,15 @@ function startScanSim() {
         scanControls.classList.remove('hidden');
         playSound(1000, 0.2); // Beep
 
+        // Update Status Text
+        const hudStatus = document.getElementById('hud-status');
+        if (hudStatus) {
+            hudStatus.innerText = 'TARGET LOCKED';
+            hudStatus.style.color = '#ff0055'; // Success Red
+            hudStatus.style.fontWeight = '900';
+            hudStatus.classList.add('glitch-text'); // If we have glitch class?
+        }
+
         // Update bars to show vulnerability found
         if (barRes) {
             barRes.style.width = '40%';
@@ -125,7 +134,12 @@ function resetScan() {
     clearTimeout(scanTimer);
     targetFrame.classList.remove('locked');
     scanControls.classList.add('hidden');
-    scanStatus.innerText = '待機中';
+    // Reset HUD
+    const hudStatus = document.getElementById('hud-status');
+    if (hudStatus) {
+        hudStatus.innerText = 'ANALYZING...';
+        hudStatus.style.color = 'var(--accent)';
+    }
 }
 
 // Button: Start Hypno Session (Go to Control)
