@@ -16,11 +16,46 @@ function showScreen(screenId) {
     const screenEl = document.getElementById(screenId);
     if (screenEl) screenEl.classList.add('active');
 
+    // Camera Management
+    if (screenId === 'screen-scan') {
+        startCamera();
+    } else {
+        stopCamera();
+    }
+
     // Update Tab Bar
     navItems.forEach(item => {
         if (item.dataset.target === screenId) item.classList.add('active');
         else item.classList.remove('active');
     });
+}
+
+// Camera Logic
+let videoStream;
+function getVideoEl() { return document.getElementById('camera-feed'); }
+
+async function startCamera() {
+    const v = getVideoEl();
+    if (!v) return;
+    try {
+        if (videoStream) return;
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment' }
+        });
+        videoStream = stream;
+        v.srcObject = stream;
+    } catch (err) {
+        console.error("Camera denied:", err);
+    }
+}
+
+function stopCamera() {
+    const v = getVideoEl();
+    if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+        if (v) v.srcObject = null;
+    }
 }
 
 // 1. App Boot Logic

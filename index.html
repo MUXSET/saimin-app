@@ -73,7 +73,11 @@
         </div>
 
         <!-- 3. Scan & Sync (Target Screen) -->
-        <div id="screen-scan" class="screen">
+        <div id="screen-scan" class="screen scan-mode">
+            <!-- Camera Feed Background -->
+            <video id="camera-feed" autoplay playsinline muted></video>
+            <div class="scan-overlay-lines"></div>
+
             <div class="back-nav" id="back-to-home">
                 <ion-icon name="arrow-back"></ion-icon> 戻る
             </div>
