@@ -90,10 +90,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 2. Scan Logic
 const targetFrame = document.querySelector('.target-frame');
-const scanStatus = document.getElementById('scan-control-panel-header'); // note: logic adapted to new ID logic if needed, but here we just animate bars
+const scanControls = document.getElementById('scan-controls');
 const barRes = document.getElementById('bar-resistance');
 const barObey = document.getElementById('bar-obedience');
 const barLust = document.getElementById('bar-lust');
+let scanTimer;
 
 function startScanSim() {
     resetScan();
