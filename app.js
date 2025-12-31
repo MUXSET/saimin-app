@@ -1,209 +1,282 @@
 // DOM Elements
-const warningScreen = document.getElementById('warning-screen');
-const bootBtn = document.getElementById('boot-btn');
-const mainInterface = document.getElementById('main-interface');
-const cameraFeed = document.getElementById('camera-feed');
-const faceBox = document.querySelector('.face-box');
-const depthSlider = document.getElementById('depth-slider');
+const statusDot = document.querySelector('.status-dot');
+const statusText = document.getElementById('status-text');
+const targetName = document.getElementById('target-name');
+const syncFill = document.getElementById('sync-fill');
+const syncPercent = document.getElementById('sync-percent');
+const syncRing = document.querySelector('.sync-ring');
 const cmdBtns = document.querySelectorAll('.cmd-btn');
 const executeBtn = document.getElementById('execute-btn');
-const effectCanvas = document.getElementById('effect-canvas');
-const clockDisplay = document.getElementById('clock');
+const commandLog = document.getElementById('command-log');
+const effectOverlay = document.getElementById('effect-overlay');
+const spiralCanvas = document.getElementById('spiral-canvas');
+const commandDisplay = document.getElementById('command-display');
 
 // State
-let isBooted = false;
-let isScanning = false;
-let isLocked = false;
+let appState = 'standby'; // standby, scanning, syncing, ready
 let selectedCmd = null;
-let effectFrameId;
+let selectedText = null;
+let syncLevel = 0;
+let spiralAnimationId = null;
 
-// Clock Update
-setInterval(() => {
-    const now = new Date();
-    clockDisplay.innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-}, 1000);
+// Audio Context
+let audioCtx = null;
 
-// 1. Boot Sequence
-bootBtn.addEventListener('click', async () => {
-    // Play Boot Sound
-    playSound(400, 'square', 0.1);
+function getAudioContext() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return audioCtx;
+}
 
-    warningScreen.style.opacity = '0';
-    setTimeout(() => {
-        warningScreen.classList.add('hidden');
-        mainInterface.classList.remove('hidden');
-        startCamera();
-    }, 500);
-});
+function playTone(freq, duration = 0.1, type = 'sine') {
+    const ctx = getAudioContext();
+    if (ctx.state === 'suspended') ctx.resume();
 
-// 2. Camera & Scanning
-async function startCamera() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        cameraFeed.srcObject = stream;
-        isScanning = true;
-        simulateScanning();
-    } catch (err) {
-        console.warn('Camera access denied, using static.');
-        isScanning = true;
-        simulateScanning(); // Still simulate scan on black screen
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + duration);
+}
+
+// Logging
+function addLog(message, type = 'system') {
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${type}`;
+    entry.textContent = `> ${message}`;
+    commandLog.appendChild(entry);
+    commandLog.scrollTop = commandLog.scrollHeight;
+}
+
+// State Machine
+function setState(newState) {
+    appState = newState;
+
+    switch (newState) {
+        case 'standby':
+            statusText.textContent = '待機中';
+            statusDot.className = 'status-dot';
+            break;
+        case 'scanning':
+            statusText.textContent = 'スキャン中';
+            statusDot.className = 'status-dot syncing';
+            syncRing.classList.add('active');
+            break;
+        case 'syncing':
+            statusText.textContent = '同期中';
+            statusDot.className = 'status-dot syncing';
+            break;
+        case 'ready':
+            statusText.textContent = '接続完了';
+            statusDot.className = 'status-dot active';
+            syncRing.classList.remove('active');
+            break;
     }
 }
 
-function simulateScanning() {
-    // Move the face box randomly until "locked"
-    const moveBox = () => {
-        if (isLocked) return;
+// Target Detection Simulation
+function startScanning() {
+    setState('scanning');
+    addLog('ターゲットをスキャン中...', 'system');
+    playTone(400, 0.15);
 
-        // Random position
-        const x = 30 + Math.random() * 40; // %
-        const y = 30 + Math.random() * 40; // %
-
-        faceBox.style.left = x + '%';
-        faceBox.style.top = y + '%';
-        faceBox.classList.remove('hidden'); // flicker
-
-        playSound(800, 'sine', 0.05); // blip
-
-        setTimeout(() => {
-            if (!isLocked) requestAnimationFrame(moveBox);
-        }, 1000 + Math.random() * 2000);
-    };
-
-    // Auto-Lock after 5 seconds
+    // Simulate finding a target
     setTimeout(() => {
-        lockTarget();
-    }, 5000);
-
-    moveBox();
+        const names = ['対象者A', '被験者001', 'ターゲット', '認識対象'];
+        targetName.textContent = names[Math.floor(Math.random() * names.length)];
+        addLog('ターゲット検出', 'system');
+        playTone(800, 0.1);
+        playTone(1000, 0.1);
+        startSyncing();
+    }, 2000);
 }
 
-function lockTarget() {
-    isLocked = true;
-    faceBox.style.left = '50%';
-    faceBox.style.top = '50%';
-    faceBox.style.borderColor = '#ff0055';
-    faceBox.classList.remove('hidden');
+function startSyncing() {
+    setState('syncing');
+    addLog('同期開始...', 'system');
 
-    document.querySelector('.lock-text').innerText = "TARGET_LOCKED";
-
-    // Play Lock Sound
-    playSound(1200, 'sawtooth', 0.1);
-    setTimeout(() => playSound(1200, 'sawtooth', 0.1), 100);
+    const syncInterval = setInterval(() => {
+        syncLevel += Math.random() * 15 + 5;
+        if (syncLevel >= 100) {
+            syncLevel = 100;
+            clearInterval(syncInterval);
+            syncComplete();
+        }
+        updateSyncDisplay();
+        playTone(200 + syncLevel * 5, 0.05);
+    }, 300);
 }
 
-// 3. Controls
-depthSlider.addEventListener('input', (e) => {
-    // Update visuals if we want
-    playSound(200 + e.target.value * 5, 'sine', 0.02);
-});
+function updateSyncDisplay() {
+    syncFill.style.width = syncLevel + '%';
+    syncPercent.textContent = Math.floor(syncLevel) + '%';
+}
 
+function syncComplete() {
+    setState('ready');
+    addLog('同期完了 - 指令待機中', 'success');
+    playTone(1200, 0.2);
+    setTimeout(() => playTone(1500, 0.2), 100);
+}
+
+// Command Selection
 cmdBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-        if (!isLocked) return; // Can't select valid cmd until lock? Or maybe allowed.
+        if (appState !== 'ready') return;
 
-        // Select logic
+        // Deselect others
         cmdBtns.forEach(b => b.classList.remove('selected'));
+
+        // Select this one
         btn.classList.add('selected');
         selectedCmd = btn.dataset.cmd;
+        selectedText = btn.dataset.text;
 
-        // Enable Execute
+        // Enable execute
         executeBtn.removeAttribute('disabled');
-        playSound(600, 'square', 0.05);
+
+        playTone(600, 0.08);
+        addLog(`指令選択: ${btn.querySelector('.cmd-text').textContent}`, 'command');
     });
 });
 
+// Execute Command
 executeBtn.addEventListener('click', () => {
-    if (!selectedCmd) return;
-    startHypnosis();
+    if (!selectedCmd || appState !== 'ready') return;
+
+    addLog(`指令実行: ${selectedText}`, 'command');
+    playTone(300, 0.3, 'sawtooth');
+
+    showEffect();
 });
 
-// 4. Execution (Spiral)
-let spiralParams = { angle: 0 };
+// Effect Display
+function showEffect() {
+    effectOverlay.classList.remove('hidden');
+    commandDisplay.textContent = selectedText;
+    commandDisplay.style.animation = 'none';
+    void commandDisplay.offsetWidth;
+    commandDisplay.style.animation = 'fadeInOut 4s ease forwards';
 
-function startHypnosis() {
-    effectCanvas.classList.remove('hidden');
-    effectCanvas.width = mainInterface.offsetWidth;
-    effectCanvas.height = mainInterface.offsetHeight;
+    startSpiral();
+    startHypnoticSound();
 
-    // Sound loop
-    startIsochronicTone();
+    // End effect after duration
+    setTimeout(() => {
+        stopSpiral();
+        effectOverlay.classList.add('hidden');
+        addLog('指令完了', 'success');
+        playTone(800, 0.2);
+        playTone(1000, 0.2);
 
+        // Reset selection
+        cmdBtns.forEach(b => b.classList.remove('selected'));
+        selectedCmd = null;
+        selectedText = null;
+        executeBtn.setAttribute('disabled', true);
+    }, 4500);
+}
+
+// Spiral Animation
+let spiralAngle = 0;
+
+function startSpiral() {
+    spiralCanvas.width = window.innerWidth;
+    spiralCanvas.height = window.innerHeight;
     animateSpiral();
 }
 
 function animateSpiral() {
-    const ctx = effectCanvas.getContext('2d');
-    const w = effectCanvas.width;
-    const h = effectCanvas.height;
+    const ctx = spiralCanvas.getContext('2d');
+    const w = spiralCanvas.width;
+    const h = spiralCanvas.height;
     const cx = w / 2;
     const cy = h / 2;
 
-    ctx.clearRect(0, 0, w, h);
+    // Clear
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+    ctx.fillRect(0, 0, w, h);
 
     ctx.save();
     ctx.translate(cx, cy);
-    ctx.rotate(spiralParams.angle);
+    ctx.rotate(spiralAngle);
 
-    // Anime "Eye" Spiral
-    ctx.lineWidth = 15;
-    for (let i = 0; i < 10; i++) {
-        const r = i * 25 + (Date.now() / 20) % 25;
+    // Draw spiral rings
+    const maxRadius = Math.max(w, h);
+    const ringCount = 15;
+
+    for (let i = 0; i < ringCount; i++) {
+        const radius = (i * 60 + (Date.now() / 10) % 60);
+        if (radius > maxRadius) continue;
+
         ctx.beginPath();
-        ctx.arc(0, 0, r, 0, Math.PI * 2);
-        ctx.strokeStyle = i % 2 === 0 ? '#ff0055' : 'transparent';
+        ctx.arc(0, 0, radius, 0, Math.PI * 2);
+
+        // Alternating pink and purple
+        if (i % 2 === 0) {
+            ctx.strokeStyle = '#ff6b9d';
+            ctx.lineWidth = 25;
+        } else {
+            ctx.strokeStyle = '#c084fc';
+            ctx.lineWidth = 20;
+        }
         ctx.stroke();
     }
 
     ctx.restore();
 
-    spiralParams.angle += 0.2;
-    effectFrameId = requestAnimationFrame(animateSpiral);
+    spiralAngle += 0.08;
+    spiralAnimationId = requestAnimationFrame(animateSpiral);
 }
 
-// Audio System
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-let pulseInterval;
-
-function playSound(freq, type, duration) {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-
-    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-
-    osc.start();
-    osc.stop(audioCtx.currentTime + duration);
+function stopSpiral() {
+    if (spiralAnimationId) {
+        cancelAnimationFrame(spiralAnimationId);
+        spiralAnimationId = null;
+    }
 }
 
-function startIsochronicTone() {
-    // Simple pulse loop
-    if (pulseInterval) clearInterval(pulseInterval);
+// Hypnotic Sound
+let hypnoInterval = null;
 
-    pulseInterval = setInterval(() => {
-        playSound(150, 'sawtooth', 0.1);
-    }, 200); // 5Hz Theta
+function startHypnoticSound() {
+    if (hypnoInterval) clearInterval(hypnoInterval);
+
+    let tick = 0;
+    hypnoInterval = setInterval(() => {
+        playTone(150 + (tick % 2) * 50, 0.1, 'sine');
+        tick++;
+    }, 250);
+
+    // Stop after effect duration
+    setTimeout(() => {
+        if (hypnoInterval) {
+            clearInterval(hypnoInterval);
+            hypnoInterval = null;
+        }
+    }, 4000);
 }
 
-// Reset
-document.querySelector('[data-cmd="reset"]').addEventListener('click', () => {
-    cancelAnimationFrame(effectFrameId);
-    effectCanvas.classList.add('hidden');
-    clearInterval(pulseInterval);
-    // Reset selection
-    isLocked = false;
-    simulateScanning();
-    executeBtn.setAttribute('disabled', true);
-    cmdBtns.forEach(b => b.classList.remove('selected'));
-    selectedCmd = null;
-    document.querySelector('.lock-text').innerText = "SEARCHING...";
-    faceBox.style.borderColor = '#ff0055';
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    addLog('アプリケーション起動', 'system');
+
+    // Start scanning after a moment
+    setTimeout(() => {
+        startScanning();
+    }, 1500);
 });
+
+// Touch feedback
+document.addEventListener('touchstart', () => {
+    // Ensure audio context is ready
+    getAudioContext();
+}, { once: true });

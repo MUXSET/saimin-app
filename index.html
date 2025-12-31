@@ -1,79 +1,116 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#000000">
-    <title>Saimin App | System</title>
+    <meta name="theme-color" content="#1a0a2e">
+    <title>催眠アプリ</title>
     <link rel="manifest" href="manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <!-- Phone Frame Container -->
-    <div class="phone-frame">
-        <div class="phone-notch"></div>
-        <div class="phone-screen">
+    <div class="app">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="app-title">催眠アプリ</div>
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span id="status-text">待機中</span>
+            </div>
+        </header>
 
-            <!-- Warning Overlay (First Load) -->
-            <div id="warning-screen" class="app-screen active">
-                <div class="warning-box">
-                    <h1 class="blink">WARNING</h1>
-                    <p>UNAUTHORIZED SOFTWARE</p>
-                    <p>USAGE AT OWN RISK</p>
-                    <button id="boot-btn">INITIALIZE</button>
+        <!-- Target Section -->
+        <section class="target-section">
+            <div class="target-card">
+                <div class="target-avatar">
+                    <div class="avatar-placeholder">
+                        <svg viewBox="0 0 100 100">
+                            <circle cx="50" cy="35" r="20" fill="currentColor" />
+                            <ellipse cx="50" cy="85" rx="35" ry="25" fill="currentColor" />
+                        </svg>
+                    </div>
+                    <div class="sync-ring"></div>
+                </div>
+                <div class="target-info">
+                    <div class="target-label">ターゲット</div>
+                    <div id="target-name" class="target-name">検索中...</div>
+                    <div class="sync-level">
+                        <span>同期率</span>
+                        <div class="sync-bar">
+                            <div id="sync-fill" class="sync-fill"></div>
+                        </div>
+                        <span id="sync-percent">0%</span>
+                    </div>
                 </div>
             </div>
+        </section>
 
-            <!-- Main Interface -->
-            <div id="main-interface" class="app-screen hidden">
-                <!-- Top Info Bar -->
-                <div class="status-bar">
-                    <span>SYS: ONLINE</span>
-                    <span id="clock">00:00</span>
-                    <span>BAT: 99%</span>
-                </div>
-
-                <!-- Camera Viewport -->
-                <div class="viewport">
-                    <video id="camera-feed" autoplay playsinline muted></video>
-                    <div class="scan-overlay">
-                        <div class="reticle"></div>
-                        <div class="face-box hidden">
-                            <span class="lock-text">LOCK_ON</span>
-                        </div>
-                        <div class="scan-lines"></div>
-                    </div>
-                </div>
-
-                <!-- Control Panel -->
-                <div class="control-panel">
-                    <div class="slider-group">
-                        <label>DEPTH_LEVEL</label>
-                        <input type="range" id="depth-slider" min="0" max="100" value="0">
-                        <div class="slider-fill"></div>
-                    </div>
-
-                    <div class="command-grid">
-                        <button class="cmd-btn" data-cmd="sleep">SLEEP</button>
-                        <button class="cmd-btn" data-cmd="obey">OBEY</button>
-                        <button class="cmd-btn" data-cmd="reset">RESET</button>
-                    </div>
-
-                    <button id="execute-btn" class="tech-btn" disabled>
-                        <span>EXECUTE</span>
+        <!-- Command Section -->
+        <section class="command-section">
+            <div class="command-category">
+                <div class="category-label">基本指令</div>
+                <div class="command-grid">
+                    <button class="cmd-btn" data-cmd="sleep" data-text="眠れ...深く眠れ...">
+                        <span class="cmd-icon">💤</span>
+                        <span class="cmd-text">睡眠</span>
+                    </button>
+                    <button class="cmd-btn" data-cmd="wake" data-text="目を覚ませ">
+                        <span class="cmd-icon">👁️</span>
+                        <span class="cmd-text">覚醒</span>
+                    </button>
+                    <button class="cmd-btn" data-cmd="freeze" data-text="動くな...そのまま止まれ">
+                        <span class="cmd-icon">🧊</span>
+                        <span class="cmd-text">停止</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Effect Overlay (The Spiral) -->
-            <canvas id="effect-canvas" class="hidden"></canvas>
+            <div class="command-category">
+                <div class="category-label">暗示指令</div>
+                <div class="command-grid">
+                    <button class="cmd-btn" data-cmd="obey" data-text="私の言うことを聞け">
+                        <span class="cmd-icon">🎯</span>
+                        <span class="cmd-text">服従</span>
+                    </button>
+                    <button class="cmd-btn" data-cmd="forget" data-text="今のことは忘れろ">
+                        <span class="cmd-icon">🌫️</span>
+                        <span class="cmd-text">忘却</span>
+                    </button>
+                    <button class="cmd-btn" data-cmd="truth" data-text="本当のことを話せ">
+                        <span class="cmd-icon">💬</span>
+                        <span class="cmd-text">真実</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Execute Button -->
+        <section class="execute-section">
+            <button id="execute-btn" class="execute-btn" disabled>
+                <span class="execute-text">実行</span>
+            </button>
+        </section>
+
+        <!-- Command Log -->
+        <section class="log-section">
+            <div class="log-label">ログ</div>
+            <div id="command-log" class="command-log">
+                <div class="log-entry system">システム起動...</div>
+            </div>
+        </section>
+
+        <!-- Effect Overlay -->
+        <div id="effect-overlay" class="effect-overlay hidden">
+            <canvas id="spiral-canvas"></canvas>
+            <div id="command-display" class="command-display"></div>
         </div>
     </div>
+
     <script src="app.js"></script>
 </body>
 
