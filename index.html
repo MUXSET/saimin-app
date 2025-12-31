@@ -15,81 +15,99 @@
 
 <body>
     <div class="app">
-        <!-- Main Screen -->
-        <div id="main-screen" class="screen active">
-            <!-- App Header -->
+        <!-- Home Screen (App Launcher Style) -->
+        <div id="home-screen" class="screen active">
+            <div class="home-bg"></div>
+            <div class="time-display">
+                <div id="time" class="time">00:00</div>
+                <div id="date" class="date">2024年1月1日</div>
+            </div>
+
+            <div class="app-grid">
+                <div class="app-icon" id="launch-app">
+                    <div class="icon-wrapper">
+                        <div class="icon-spiral">🌀</div>
+                    </div>
+                    <span class="icon-label">催眠</span>
+                </div>
+            </div>
+
+            <div class="home-indicator"></div>
+        </div>
+
+        <!-- Main App Screen -->
+        <div id="main-screen" class="screen">
             <div class="app-header">
-                <div class="app-logo">催眠</div>
-                <div class="app-version">v2.0</div>
+                <button id="back-btn" class="back-btn">←</button>
+                <div class="app-title">催眠アプリ</div>
+                <div class="header-space"></div>
             </div>
 
-            <!-- Target Display -->
-            <div class="target-display">
-                <div class="target-frame">
-                    <div class="target-silhouette">
-                        <svg viewBox="0 0 100 120">
-                            <circle cx="50" cy="30" r="25" fill="currentColor" />
-                            <path d="M50 60 C20 60, 10 100, 10 120 L90 120 C90 100, 80 60, 50 60" fill="currentColor" />
+            <div class="app-content">
+                <!-- Target Card -->
+                <div class="target-card">
+                    <div class="target-avatar">
+                        <svg viewBox="0 0 80 100">
+                            <circle cx="40" cy="25" r="20" fill="#555" />
+                            <ellipse cx="40" cy="75" rx="30" ry="25" fill="#555" />
                         </svg>
+                        <div class="avatar-ring"></div>
                     </div>
-                    <div class="scan-effect"></div>
-                </div>
-                <div class="target-status">
-                    <span id="status-label">検索中</span>
-                    <div class="status-dots">
-                        <span class="dot"></span>
-                        <span class="dot"></span>
-                        <span class="dot"></span>
+                    <div class="target-info">
+                        <div class="info-row">
+                            <span class="label">状態</span>
+                            <span id="target-status" class="value status-waiting">検索中</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">支配率</span>
+                            <div class="mini-bar">
+                                <div id="control-bar" class="mini-fill"></div>
+                            </div>
+                            <span id="control-pct" class="value">0%</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Control Level -->
-            <div class="control-section">
-                <div class="level-label">支配レベル</div>
-                <div class="level-bar">
-                    <div id="level-fill" class="level-fill"></div>
-                </div>
-                <div id="level-text" class="level-text">0%</div>
-            </div>
-
-            <!-- Command Buttons -->
-            <div class="command-buttons">
-                <button class="cmd-btn large" data-cmd="hypno" id="main-btn" disabled>
-                    <span class="btn-text">催眠開始</span>
-                </button>
-
-                <div class="sub-commands">
-                    <button class="cmd-btn small" data-cmd="sleep" disabled>
-                        <span>💤</span>
-                        <span>眠れ</span>
-                    </button>
-                    <button class="cmd-btn small" data-cmd="obey" disabled>
-                        <span>🎯</span>
-                        <span>服従</span>
-                    </button>
-                    <button class="cmd-btn small" data-cmd="forget" disabled>
-                        <span>🌫️</span>
-                        <span>忘却</span>
+                <!-- Action Buttons -->
+                <div class="action-section">
+                    <button id="hypno-btn" class="action-btn primary" disabled>
+                        <span class="btn-icon">🌀</span>
+                        <span class="btn-label">催眠開始</span>
                     </button>
                 </div>
-            </div>
 
-            <!-- History -->
-            <div class="history-section">
-                <div id="history-log" class="history-log">
-                    <div class="log-item">アプリ起動...</div>
+                <div class="command-section">
+                    <div class="section-title">コマンド</div>
+                    <div class="command-list">
+                        <button class="command-btn" data-cmd="sleep" data-text="眠れ..." disabled>
+                            💤 眠れ
+                        </button>
+                        <button class="command-btn" data-cmd="obey" data-text="私に従え" disabled>
+                            🎯 服従
+                        </button>
+                        <button class="command-btn" data-cmd="forget" data-text="忘れろ" disabled>
+                            🌫️ 忘却
+                        </button>
+                        <button class="command-btn" data-cmd="truth" data-text="本当のことを言え" disabled>
+                            💬 真実
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Log -->
+                <div class="log-section">
+                    <div id="log" class="log-content">
+                        <div class="log-line">システム起動</div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Hypnosis Effect Screen -->
-        <div id="effect-screen" class="screen">
-            <div class="spiral-container">
-                <img src="cuimian.gif" alt="spiral" class="spiral-gif" id="spiral-img">
-            </div>
+        <!-- Effect Screen -->
+        <div id="effect-screen" class="screen effect-screen">
+            <img src="cuimian.gif" id="spiral-gif" class="spiral-gif" alt="">
             <div id="effect-text" class="effect-text"></div>
-            <div class="effect-progress">
+            <div class="effect-bar-container">
                 <div id="effect-bar" class="effect-bar"></div>
             </div>
         </div>
