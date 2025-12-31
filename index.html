@@ -11,106 +11,157 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <!-- Ionicons for Tab Bar -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </head>
 
 <body>
     <div class="app">
-        <!-- Home Screen (App Launcher Style) -->
-        <div id="home-screen" class="screen active">
-            <div class="home-bg"></div>
-            <div class="time-display">
-                <div id="time" class="time">00:00</div>
-                <div id="date" class="date">2024年1月1日</div>
+        <!-- 1. Splash Screen -->
+        <div id="screen-splash" class="screen active splash-screen">
+            <div class="splash-logo">
+                <div class="splash-icon">🌀</div>
+                <h1>System<br>Booting</h1>
             </div>
+            <div class="loading-bar">
+                <div class="loading-fill"></div>
+            </div>
+        </div>
 
-            <div class="app-grid">
-                <div class="app-icon" id="launch-app">
-                    <div class="icon-wrapper">
-                        <div class="icon-spiral">🌀</div>
-                    </div>
-                    <span class="icon-label">催眠</span>
+        <!-- 2. Home Dashboard -->
+        <div id="screen-home" class="screen">
+            <header class="home-header">
+                <h2>ダッシュボード</h2>
+                <div class="user-avatar">M</div>
+            </header>
+
+            <div class="status-card">
+                <div class="card-title">システム状態</div>
+                <div class="status-row">
+                    <span class="status-badge online">ONLINE</span>
+                    <span class="version">v2.1.0</span>
                 </div>
             </div>
 
-            <div class="home-indicator"></div>
-        </div>
-
-        <!-- Main App Screen -->
-        <div id="main-screen" class="screen">
-            <div class="app-header">
-                <button id="back-btn" class="back-btn">←</button>
-                <div class="app-title">催眠アプリ</div>
-                <div class="header-space"></div>
+            <div class="action-grid">
+                <div class="action-card primary" id="btn-goto-scan">
+                    <div class="card-icon">🎯</div>
+                    <h3>新規ターゲット</h3>
+                    <p>スキャンを開始</p>
+                </div>
+                <div class="action-card">
+                    <div class="card-icon">📜</div>
+                    <h3>履歴ログ</h3>
+                    <p>過去の記録</p>
+                </div>
             </div>
 
-            <div class="app-content">
-                <!-- Target Card -->
-                <div class="target-card">
-                    <div class="target-avatar">
-                        <svg viewBox="0 0 80 100">
-                            <circle cx="40" cy="25" r="20" fill="#555" />
-                            <ellipse cx="40" cy="75" rx="30" ry="25" fill="#555" />
+            <div class="recent-section">
+                <h3>最近のターゲット</h3>
+                <div class="recent-list">
+                    <div class="recent-item">
+                        <div class="recent-icon">👤</div>
+                        <div class="recent-info">
+                            <span class="name">被験者-092</span>
+                            <span class="date">昨日 23:45</span>
+                        </div>
+                        <span class="level-tag">Lv.3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Scan & Sync (Target Screen) -->
+        <div id="screen-scan" class="screen">
+            <div class="back-nav" id="back-to-home">
+                <ion-icon name="arrow-back"></ion-icon> 戻る
+            </div>
+
+            <div class="target-display">
+                <div class="target-frame">
+                    <div class="target-silhouette">
+                        <svg viewBox="0 0 100 120">
+                            <circle cx="50" cy="30" r="25" fill="currentColor" />
+                            <path d="M50 60 C20 60, 10 100, 10 120 L90 120 C90 100, 80 60, 50 60" fill="currentColor" />
                         </svg>
-                        <div class="avatar-ring"></div>
                     </div>
-                    <div class="target-info">
-                        <div class="info-row">
-                            <span class="label">状態</span>
-                            <span id="target-status" class="value status-waiting">検索中</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="label">支配率</span>
-                            <div class="mini-bar">
-                                <div id="control-bar" class="mini-fill"></div>
-                            </div>
-                            <span id="control-pct" class="value">0%</span>
-                        </div>
-                    </div>
+                    <div class="scan-effect"></div>
                 </div>
+                <div class="target-status">
+                    <span id="scan-status-text">検索中...</span>
+                </div>
+            </div>
 
-                <!-- Action Buttons -->
-                <div class="action-section">
-                    <button id="hypno-btn" class="action-btn primary" disabled>
-                        <span class="btn-icon">🌀</span>
-                        <span class="btn-label">催眠開始</span>
-                    </button>
-                </div>
-
-                <div class="command-section">
-                    <div class="section-title">コマンド</div>
-                    <div class="command-list">
-                        <button class="command-btn" data-cmd="sleep" data-text="眠れ..." disabled>
-                            💤 眠れ
-                        </button>
-                        <button class="command-btn" data-cmd="obey" data-text="私に従え" disabled>
-                            🎯 服従
-                        </button>
-                        <button class="command-btn" data-cmd="forget" data-text="忘れろ" disabled>
-                            🌫️ 忘却
-                        </button>
-                        <button class="command-btn" data-cmd="truth" data-text="本当のことを言え" disabled>
-                            💬 真実
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Log -->
-                <div class="log-section">
-                    <div id="log" class="log-content">
-                        <div class="log-line">システム起動</div>
-                    </div>
-                </div>
+            <div class="control-panel hidden" id="scan-controls">
+                <div class="panel-header">接続確立</div>
+                <button class="prime-btn" id="btn-start-hypno">催眠セッション開始</button>
             </div>
         </div>
 
-        <!-- Effect Screen -->
-        <div id="effect-screen" class="screen effect-screen">
-            <img src="cuimian.gif" id="spiral-gif" class="spiral-gif" alt="">
-            <div id="effect-text" class="effect-text"></div>
+        <!-- 4. Hypnosis Controller (Main Control) -->
+        <div id="screen-control" class="screen">
+            <header class="control-header">
+                <div class="target-mini">
+                    <div class="mini-avatar"></div>
+                    <span class="mini-name">被験者-093</span>
+                </div>
+                <div class="level-badge">Lv. 1</div>
+            </header>
+
+            <div class="command-grid-full">
+                <button class="cmd-tile" data-cmd="sleep" data-text="眠りなさい...">
+                    <div class="tile-icon">💤</div>
+                    <span>睡眠</span>
+                </button>
+                <button class="cmd-tile" data-cmd="obey" data-text="私の言葉は絶対...">
+                    <div class="tile-icon">🤝</div>
+                    <span>服従</span>
+                </button>
+                <button class="cmd-tile" data-cmd="freeze" data-text="体が動かない...">
+                    <div class="tile-icon">🧊</div>
+                    <span>拘束</span>
+                </button>
+                <button class="cmd-tile" data-cmd="truth" data-text="真実を話せ...">
+                    <div class="tile-icon">👁️</div>
+                    <span>自白</span>
+                </button>
+            </div>
+
+            <div class="slider-wrapper">
+                <label>深度調整</label>
+                <input type="range" min="0" max="100" value="50" class="depth-slider">
+            </div>
+        </div>
+
+        <!-- 5. Effect Overlay -->
+        <div id="screen-effect" class="effect-layer hidden">
+            <div class="spiral-container">
+                <img src="cuimian.gif" class="spiral-gif">
+            </div>
+            <div class="effect-text-container">
+                <div id="hypno-text">...</div>
+            </div>
             <div class="effect-bar-container">
-                <div id="effect-bar" class="effect-bar"></div>
+                <div id="hypno-bar"></div>
             </div>
         </div>
+
+        <!-- Bottom Tab Bar -->
+        <nav class="tab-bar">
+            <div class="tab-item active" data-target="screen-home">
+                <ion-icon name="home"></ion-icon>
+                <span>ホーム</span>
+            </div>
+            <div class="tab-item" data-target="screen-scan">
+                <ion-icon name="scan-circle"></ion-icon>
+                <span>スキャン</span>
+            </div>
+            <div class="tab-item">
+                <ion-icon name="person"></ion-icon>
+                <span>設定</span>
+            </div>
+        </nav>
     </div>
 
     <script src="app.js"></script>

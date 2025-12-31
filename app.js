@@ -1,39 +1,127 @@
-// Screens
-const homeScreen = document.getElementById('home-screen');
-const mainScreen = document.getElementById('main-screen');
-const effectScreen = document.getElementById('effect-screen');
+// Navigation & Routing
+const screens = {
+    splash: document.getElementById('screen-splash'),
+    home: document.getElementById('screen-home'),
+    scan: document.getElementById('screen-scan'),
+    control: document.getElementById('screen-control'),
+    effect: document.getElementById('screen-effect')
+};
 
-// Home
-const launchApp = document.getElementById('launch-app');
-const timeEl = document.getElementById('time');
-const dateEl = document.getElementById('date');
+const navItems = document.querySelectorAll('.tab-item');
 
-// Main
-const backBtn = document.getElementById('back-btn');
-const targetStatus = document.getElementById('target-status');
-const controlBar = document.getElementById('control-bar');
-const controlPct = document.getElementById('control-pct');
-const hypnoBtn = document.getElementById('hypno-btn');
-const commandBtns = document.querySelectorAll('.command-btn');
-const logEl = document.getElementById('log');
+function showScreen(screenId) {
+    // Hide all
+    Object.values(screens).forEach(el => el.classList.remove('active'));
+    // Show specific
+    const screenEl = document.getElementById(screenId);
+    if (screenEl) screenEl.classList.add('active');
 
-// Effect
-const spiralGif = document.getElementById('spiral-gif');
-const effectText = document.getElementById('effect-text');
-const effectBar = document.getElementById('effect-bar');
+    // Update Tab Bar
+    navItems.forEach(item => {
+        if (item.dataset.target === screenId) item.classList.add('active');
+        else item.classList.remove('active');
+    });
+}
 
-// State
-let controlLevel = 0;
-let isConnected = false;
+// 1. App Boot Logic
+document.addEventListener('DOMContentLoaded', () => {
+    // Splash Timer
+    setTimeout(() => {
+        showScreen('screen-home');
+        // Hide splash after transition locally if needed, but 'active' toggle works
+        screens.splash.classList.remove('active');
+    }, 2500);
 
-// Audio
-let audioCtx;
-function beep(freq, dur = 0.1, type = 'sine') {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // Tab Navigation
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const target = item.dataset.target;
+            if (target) showScreen(target);
+        });
+    });
+
+    // Button: Go to Scan
+    document.getElementById('btn-goto-scan').addEventListener('click', () => {
+        showScreen('screen-scan');
+        startScanSim();
+    });
+
+    // Button: Back to Home
+    document.getElementById('back-to-home').addEventListener('click', () => {
+        showScreen('screen-home');
+        resetScan();
+    });
+});
+
+// 2. Scan Logic
+const targetFrame = document.querySelector('.target-frame');
+const scanStatus = document.getElementById('scan-status-text');
+const scanControls = document.getElementById('scan-controls');
+let scanTimer;
+
+function startScanSim() {
+    resetScan();
+    scanStatus.innerText = '周囲の信号を検索中...';
+
+    // Fake delay
+    scanTimer = setTimeout(() => {
+        targetFrame.classList.add('locked');
+        scanStatus.innerText = '接続確立: 被験者-093';
+        scanControls.classList.remove('hidden');
+        playSound(1000, 0.2); // Beep
+    }, 2500);
+}
+
+function resetScan() {
+    clearTimeout(scanTimer);
+    targetFrame.classList.remove('locked');
+    scanControls.classList.add('hidden');
+    scanStatus.innerText = '待機中';
+}
+
+// Button: Start Hypno Session (Go to Control)
+document.getElementById('btn-start-hypno').addEventListener('click', () => {
+    showScreen('screen-control');
+});
+
+// 3. Command Logic
+document.querySelectorAll('.cmd-tile').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const text = btn.dataset.text;
+        triggerEffect(text);
+    });
+});
+
+const effectLayer = document.getElementById('screen-effect');
+const hypnoText = document.getElementById('hypno-text');
+const hypnoBar = document.getElementById('hypno-bar');
+
+function triggerEffect(text) {
+    effectLayer.classList.remove('hidden');
+    hypnoText.innerText = text;
+    playSound(400, 0.4); // Deep sound
+
+    // Progress Bar
+    hypnoBar.style.width = '0%';
+    let p = 0;
+    const interval = setInterval(() => {
+        p += 2;
+        hypnoBar.style.width = p + '%';
+        if (p >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+                effectLayer.classList.add('hidden');
+            }, 500);
+        }
+    }, 50);
+}
+
+// Simple Audio
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playSound(freq, dur) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    osc.type = type;
     osc.frequency.value = freq;
     gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
@@ -42,131 +130,3 @@ function beep(freq, dur = 0.1, type = 'sine') {
     osc.start();
     osc.stop(audioCtx.currentTime + dur);
 }
-
-// Update time
-function updateTime() {
-    const now = new Date();
-    timeEl.textContent = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
-    dateEl.textContent = now.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
-}
-updateTime();
-setInterval(updateTime, 1000);
-
-// Log
-function log(msg, type = '') {
-    const line = document.createElement('div');
-    line.className = 'log-line ' + type;
-    line.textContent = '> ' + msg;
-    logEl.appendChild(line);
-    logEl.scrollTop = logEl.scrollHeight;
-}
-
-// Show screen
-function showScreen(screen) {
-    [homeScreen, mainScreen, effectScreen].forEach(s => s.classList.remove('active'));
-    screen.classList.add('active');
-}
-
-// Launch App from Home
-launchApp.addEventListener('click', () => {
-    beep(800, 0.1);
-    showScreen(mainScreen);
-    if (!isConnected) {
-        startScan();
-    }
-});
-
-// Back to Home
-backBtn.addEventListener('click', () => {
-    beep(400, 0.1);
-    showScreen(homeScreen);
-});
-
-// Scan for target
-function startScan() {
-    log('ターゲット検索中...');
-    targetStatus.textContent = '検索中';
-    targetStatus.className = 'value status-waiting';
-
-    setTimeout(() => {
-        beep(1000, 0.15);
-        beep(1200, 0.15);
-        isConnected = true;
-        targetStatus.textContent = '接続完了';
-        targetStatus.className = 'value status-connected';
-        hypnoBtn.removeAttribute('disabled');
-        log('ターゲット捕捉', 'ok');
-    }, 2500);
-}
-
-// Update control display
-function updateControl() {
-    controlBar.style.width = controlLevel + '%';
-    controlPct.textContent = controlLevel + '%';
-
-    if (controlLevel >= 50) {
-        targetStatus.textContent = '支配中';
-        targetStatus.className = 'value status-controlled';
-        commandBtns.forEach(btn => btn.removeAttribute('disabled'));
-    }
-}
-
-// Hypnosis
-hypnoBtn.addEventListener('click', () => {
-    if (!isConnected) return;
-    log('催眠開始', 'cmd');
-    beep(300, 0.2, 'sawtooth');
-    runEffect('深く落ちろ...', 3000, () => {
-        controlLevel = Math.min(100, controlLevel + 30);
-        updateControl();
-        log('催眠成功 - 支配率上昇', 'ok');
-    });
-});
-
-// Commands
-commandBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        const text = btn.dataset.text;
-        log(`コマンド: ${text}`, 'cmd');
-        beep(600, 0.1);
-        runEffect(text, 2000, () => {
-            log('実行完了', 'ok');
-        });
-    });
-});
-
-// Run Effect
-function runEffect(text, duration, callback) {
-    showScreen(effectScreen);
-    effectText.textContent = text;
-    effectBar.style.width = '0%';
-
-    // Animate bar
-    let start = Date.now();
-    function tick() {
-        let elapsed = Date.now() - start;
-        let pct = Math.min(100, (elapsed / duration) * 100);
-        effectBar.style.width = pct + '%';
-
-        if (elapsed < duration) {
-            requestAnimationFrame(tick);
-        } else {
-            // Done
-            beep(800, 0.15);
-            setTimeout(() => {
-                showScreen(mainScreen);
-                if (callback) callback();
-            }, 300);
-        }
-    }
-    tick();
-
-    // Audio pulse
-    let pulseInt = setInterval(() => beep(150, 0.08, 'sine'), 200);
-    setTimeout(() => clearInterval(pulseInt), duration);
-}
-
-// Enable audio on interaction
-document.addEventListener('click', () => {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-}, { once: true });
