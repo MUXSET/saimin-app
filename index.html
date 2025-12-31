@@ -82,18 +82,35 @@
                 <ion-icon name="arrow-back"></ion-icon> 戻る
             </div>
 
-            <div class="target-display">
-                <div class="target-frame">
-                    <div class="target-silhouette">
-                        <svg viewBox="0 0 100 120">
-                            <circle cx="50" cy="30" r="25" fill="currentColor" />
-                            <path d="M50 60 C20 60, 10 100, 10 120 L90 120 C90 100, 80 60, 50 60" fill="currentColor" />
-                        </svg>
+            <!-- New HUD -->
+            <div class="hud-container">
+                <div class="hud-ring"></div>
+                <div class="target-info">
+                    <div class="stat-row">
+                        <div class="stat-bar">
+                            <span class="stat-label">RESISTANCE</span>
+                            <div class="stat-fill" style="width: 95%" id="bar-resistance"></div>
+                        </div>
                     </div>
-                    <div class="scan-effect"></div>
+                    <div class="stat-row">
+                        <div class="stat-bar">
+                            <span class="stat-label">OBEDIENCE</span>
+                            <div class="stat-fill" style="width: 5%" id="bar-obedience"></div>
+                        </div>
+                    </div>
+                    <div class="stat-row">
+                        <div class="stat-bar">
+                            <span class="stat-label">LUST</span>
+                            <div class="stat-fill" style="width: 15%" id="bar-lust"></div>
+                        </div>
+                    </div>
+                    <div id="hud-status">ANALYZING...</div>
                 </div>
-                <div class="target-status">
-                    <span id="scan-status-text">検索中...</span>
+            </div>
+
+            <div class="target-display overlay-mode">
+                <div class="target-frame">
+                    <div class="scan-effect"></div>
                 </div>
             </div>
 
