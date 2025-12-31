@@ -1,0 +1,366 @@
+:root {
+    --tech-bg: #050505;
+    --tech-pink: #ff0055;
+    --tech-purple: #bb00ff;
+    --tech-cyan: #00f3ff;
+    --tech-dim: #444;
+    --font-tech: 'Share Tech Mono', monospace;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+body {
+    background-color: #1a1a1a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: var(--font-tech);
+    overflow: hidden;
+}
+
+/* Phone Frame */
+.phone-frame {
+    width: 375px;
+    height: 812px;
+    background: #000;
+    border-radius: 40px;
+    border: 8px solid #333;
+    position: relative;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+.phone-notch {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    height: 30px;
+    background: #000;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    z-index: 100;
+}
+
+.phone-screen {
+    width: 100%;
+    height: 100%;
+    background: var(--tech-bg);
+    position: relative;
+    overflow: hidden;
+    color: var(--tech-cyan);
+}
+
+/* Screens */
+.app-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+    transition: opacity 0.3s;
+}
+
+.hidden {
+    display: none !important;
+    opacity: 0;
+}
+
+/* Warning Boot Screen */
+#warning-screen {
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(#2a0000, #000);
+    z-index: 50;
+}
+
+.warning-box {
+    border: 2px solid var(--tech-pink);
+    padding: 2rem;
+    text-align: center;
+    color: var(--tech-pink);
+    box-shadow: 0 0 20px rgba(255, 0, 85, 0.2);
+}
+
+.blink {
+    animation: blink 0.5s infinite;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+#boot-btn {
+    margin-top: 2rem;
+    background: transparent;
+    border: 1px solid var(--tech-pink);
+    color: var(--tech-pink);
+    padding: 10px 20px;
+    font-family: var(--font-tech);
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+#boot-btn:hover {
+    background: var(--tech-pink);
+    color: #000;
+}
+
+/* Main Interface */
+.status-bar {
+    height: 40px;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 20;
+    padding-top: 10px;
+    /* Clear notch */
+}
+
+/* Viewport (Camera) */
+.viewport {
+    flex: 1;
+    position: relative;
+    background: #111;
+    overflow: hidden;
+}
+
+#camera-feed {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.6;
+    /* Darken for UI pop */
+}
+
+.scan-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.scan-lines {
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(0deg,
+            transparent,
+            transparent 2px,
+            rgba(0, 243, 255, 0.1) 3px,
+            rgba(0, 243, 255, 0.1) 3px);
+    animation: scan 10s linear infinite;
+}
+
+.reticle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    border: 1px solid rgba(0, 243, 255, 0.3);
+}
+
+.reticle::before,
+.reticle::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--tech-cyan);
+    transition: all 0.3s;
+}
+
+.reticle::before {
+    top: 0;
+    left: 0;
+    border-right: none;
+    border-bottom: none;
+}
+
+.reticle::after {
+    bottom: 0;
+    right: 0;
+    border-left: none;
+    border-top: none;
+}
+
+.face-box {
+    position: absolute;
+    top: 50%;
+    /* Dynamic */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 180px;
+    border: 2px solid var(--tech-pink);
+    box-shadow: 0 0 10px var(--tech-pink);
+    transition: all 0.2s;
+}
+
+.lock-text {
+    position: absolute;
+    top: -20px;
+    left: 0;
+    background: var(--tech-pink);
+    color: #000;
+    font-size: 0.8rem;
+    padding: 2px 5px;
+}
+
+/* Control Panel */
+.control-panel {
+    height: 250px;
+    background: rgba(0, 0, 0, 0.9);
+    border-top: 1px solid var(--tech-dim);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#depth-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 10px;
+    background: #333;
+    border-radius: 5px;
+    outline: none;
+    overflow: hidden;
+}
+
+#depth-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--tech-purple);
+    cursor: pointer;
+    box-shadow: -407px 0 0 400px var(--tech-purple);
+}
+
+.command-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+
+.cmd-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--tech-dim);
+    color: var(--tech-dim);
+    padding: 10px;
+    font-family: var(--font-tech);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cmd-btn.selected {
+    border-color: var(--tech-cyan);
+    color: var(--tech-cyan);
+    background: rgba(0, 243, 255, 0.1);
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+}
+
+#execute-btn {
+    width: 100%;
+    padding: 15px;
+    background: #222;
+    border: none;
+    color: #555;
+    font-family: var(--font-tech);
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    margin-top: auto;
+    cursor: not-allowed;
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    transition: all 0.3s;
+}
+
+#execute-btn:not([disabled]) {
+    background: var(--tech-pink);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 0 20px var(--tech-pink);
+    animation: pulseBtn 2s infinite;
+}
+
+@keyframes pulseBtn {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Effect Canvas */
+#effect-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    pointer-events: none;
+    mix-blend-mode: hard-light;
+}
+
+/* Mobile / PWA Mode */
+@media (max-width: 600px) {
+    body {
+        align-items: flex-start;
+        background: #000;
+    }
+
+    .phone-frame {
+        width: 100vw;
+        height: 100dvh;
+        /* Dynamic viewport height */
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .phone-notch {
+        display: none;
+    }
+
+    .status-bar {
+        padding-top: 5px;
+    }
+}

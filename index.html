@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <title>Saimin App | System</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Phone Frame Container -->
+    <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+
+            <!-- Warning Overlay (First Load) -->
+            <div id="warning-screen" class="app-screen active">
+                <div class="warning-box">
+                    <h1 class="blink">WARNING</h1>
+                    <p>UNAUTHORIZED SOFTWARE</p>
+                    <p>USAGE AT OWN RISK</p>
+                    <button id="boot-btn">INITIALIZE</button>
+                </div>
+            </div>
+
+            <!-- Main Interface -->
+            <div id="main-interface" class="app-screen hidden">
+                <!-- Top Info Bar -->
+                <div class="status-bar">
+                    <span>SYS: ONLINE</span>
+                    <span id="clock">00:00</span>
+                    <span>BAT: 99%</span>
+                </div>
+
+                <!-- Camera Viewport -->
+                <div class="viewport">
+                    <video id="camera-feed" autoplay playsinline muted></video>
+                    <div class="scan-overlay">
+                        <div class="reticle"></div>
+                        <div class="face-box hidden">
+                            <span class="lock-text">LOCK_ON</span>
+                        </div>
+                        <div class="scan-lines"></div>
+                    </div>
+                </div>
+
+                <!-- Control Panel -->
+                <div class="control-panel">
+                    <div class="slider-group">
+                        <label>DEPTH_LEVEL</label>
+                        <input type="range" id="depth-slider" min="0" max="100" value="0">
+                        <div class="slider-fill"></div>
+                    </div>
+
+                    <div class="command-grid">
+                        <button class="cmd-btn" data-cmd="sleep">SLEEP</button>
+                        <button class="cmd-btn" data-cmd="obey">OBEY</button>
+                        <button class="cmd-btn" data-cmd="reset">RESET</button>
+                    </div>
+
+                    <button id="execute-btn" class="tech-btn" disabled>
+                        <span>EXECUTE</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Effect Overlay (The Spiral) -->
+            <canvas id="effect-canvas" class="hidden"></canvas>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+
+</html>
